@@ -3,11 +3,13 @@
 -- Thanks to @TobleMiner
 -- Licensed under MIT
 local Key
-function open (side, key)
+local Receiver = nil
+function open (side, key, id)
     if (not rednet.isOpen(side)) then
         rednet.open(side)
     end
     Key = key
+    Receiver = id
 end
 function writeText(text, color, displayTime)
     message = {}
@@ -15,7 +17,11 @@ function writeText(text, color, displayTime)
     message.Text = text
     message.Color = color
     message.DisplayTime = displayTime
-    rednet.broadcast(textutils.serialize(message))
+    if (Receiver == nil) then
+        rednet.broadcast(textutils.serialize(message))
+    else
+        rednet.send(Receiver, textutils.serialize(message))
+    end
 end
 function ownPrint (...)
     text = ""
@@ -27,7 +33,11 @@ function ownPrint (...)
     message = {}
     message.Key = Key
     message.Text = text
-    rednet.broadcast(textutils.serialize(message))
+    if (Receiver == nil) then
+        rednet.broadcast(textutils.serialize(message))
+    else
+        rednet.send(Receiver, textutils.serialize(message))
+    end
 end
 function hookGlobal()
     _G.print = ownPrint
