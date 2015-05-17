@@ -4,12 +4,14 @@
 -- Licensed under MIT
 local Key
 local Receiver = nil
-function open (side, key, id)
+local Prefix = nil
+function open (side, key, id, prefix)
     if (not rednet.isOpen(side)) then
         rednet.open(side)
     end
     Key = key
     Receiver = id
+    Prefix = prefix
 end
 function writeText(text, color, displayTime)
     message = {}
@@ -17,6 +19,9 @@ function writeText(text, color, displayTime)
     message.Text = text
     message.Color = color
     message.DisplayTime = displayTime
+    if (Prefix ~= nil) then
+        message.Text = "["..Prefix.."] "..message.Text
+    end
     if (Receiver == nil) then
         rednet.broadcast(textutils.serialize(message))
     else
@@ -33,6 +38,9 @@ function ownPrint (...)
     message = {}
     message.Key = Key
     message.Text = text
+    if (Prefix ~= nil) then
+        message.Text = "["..Prefix.."] "..message.Text
+    end
     if (Receiver == nil) then
         rednet.broadcast(textutils.serialize(message))
     else
